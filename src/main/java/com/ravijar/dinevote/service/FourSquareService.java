@@ -40,6 +40,7 @@ public class FourSquareService {
                 .queryParam("radius",radius)
                 .queryParam("categories",categories)
                 .queryParam("fields",fields)
+                .queryParam("limit","50")
                 .toUriString();
 
         // set up headers
