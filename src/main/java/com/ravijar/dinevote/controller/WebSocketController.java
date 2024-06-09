@@ -1,15 +1,10 @@
 package com.ravijar.dinevote.controller;
 
-import com.ravijar.dinevote.model.LocationVote;
-import com.ravijar.dinevote.model.SessionInput;
-import com.ravijar.dinevote.model.SessionOutput;
-import com.ravijar.dinevote.model.UserVote;
+import com.ravijar.dinevote.model.*;
 import com.ravijar.dinevote.service.VoteService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class WebSocketController {
@@ -28,7 +23,7 @@ public class WebSocketController {
 
     @MessageMapping("/vote/{sessionId}")
     @SendTo("/session/vote/{sessionId}")
-    public LocationVote getVoteData(@Payload UserVote userVote, @PathVariable String sessionId) {
-        return voteService.updateVoteSession(sessionId, userVote);
+    public LocationVote getVoteData(VoteInput voteInput) {
+        return voteService.updateVoteSession(voteInput.getSessionId(), voteInput.getUserVote());
     }
 }
