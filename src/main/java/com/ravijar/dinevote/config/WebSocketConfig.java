@@ -18,7 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/dinevote");
+        registry.addEndpoint("/dinevote").setAllowedOrigins("http://localhost:8000").withSockJS();;
     }
 }
 
