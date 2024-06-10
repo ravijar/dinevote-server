@@ -16,13 +16,13 @@ public class WebSocketController {
     }
 
     @MessageMapping("/vote")
-    @SendTo("/session/vote")
+    @SendTo("/subscribe/vote")
     public SessionOutput getSessionData(SessionInput sessionInput) {
         return voteService.addVoteSession(sessionInput);
     }
 
     @MessageMapping("/vote/{sessionId}")
-    @SendTo("/session/vote/{sessionId}")
+    @SendTo("/subscribe/vote/{sessionId}")
     public LocationVote getVoteData(VoteInput voteInput) {
         return voteService.updateVoteSession(voteInput.getSessionId(), voteInput.getUserVote());
     }
