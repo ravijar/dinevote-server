@@ -17,7 +17,7 @@
             overflow-y: scroll;
             margin-bottom: 10px;
         }
-        #messageInput, #sessionIdInput, #voteSessionIdInput, #userIdInput, #fsqIdInput, #fsqIdsInput, #userIdsInput {
+        #messageInput, #voteSessionIdInput, #userIdInput, #fsqIdInput, #fsqIdsInput, #userIdsInput {
             width: calc(100% - 110px);
         }
         #connectBtn, #voteBtn, #sessionBtn {
@@ -37,131 +37,152 @@
     </style>
 </head>
 <body>
-    <h1>WebSocket Client</h1>
+<h1>WebSocket Client</h1>
 
-    <div>
-        <button id="connectGeneralBtn" onclick="connectGeneral()">Connect to General Session</button>
-    </div>
-    <div>
-        <input type="text" id="sessionIdInput" placeholder="Enter session ID" />
-        <button id="connectBtn" onclick="connectToSession()">Connect to Specific Session</button>
-    </div>
+<div>
+    <input type="text" id="userId" placeholder="Enter User ID" />
+    <button id="connectUserBtn" onclick="connectUser()">Connect to User Session</button>
+</div>
+<div>
+    <input type="text" id="sessionIdInput" placeholder="Enter session ID" />
+    <button id="connectBtn" onclick="connectToSession()">Connect to Specific Session</button>
+</div>
 
-    <div>
-        <input type="text" id="voteSessionIdInput" placeholder="Enter session ID for voting" />
-        <input type="text" id="userIdInput" placeholder="Enter user ID" />
-        <input type="text" id="fsqIdInput" placeholder="Enter FSQ ID" />
-        <button id="voteBtn" onclick="sendVote()">Send Vote</button>
-    </div>
+<div>
+    <input type="text" id="voteSessionIdInput" placeholder="Enter session ID for voting" />
+    <input type="text" id="userIdInput" placeholder="Enter user ID" />
+    <input type="text" id="fsqIdInput" placeholder="Enter FSQ ID" />
+    <button id="voteBtn" onclick="sendVote()">Send Vote</button>
+</div>
 
-    <div>
-        <input type="text" id="fsqIdsInput" placeholder="Enter FSQ IDs (comma separated)" />
-        <input type="text" id="userIdsInput" placeholder="Enter User IDs (comma separated)" />
-        <button id="sessionBtn" onclick="sendSession()">Send Session</button>
-    </div>
+<div>
+    <input type="text" id="fsqIdsInput" placeholder="Enter FSQ IDs (comma separated)" />
+    <input type="text" id="userIdsInput" placeholder="Enter User IDs (comma separated)" />
+    <button id="sessionBtn" onclick="sendSession()">Send Session</button>
+</div>
 
-    <div id="messages"></div>
+<div id="messages"></div>
 
-    <div id="connections">
-        <h2>Connected Endpoints</h2>
-        <div id="connectionList"></div>
-    </div>
+<div id="connections">
+    <h2>Connected Endpoints</h2>
+    <div id="connectionList"></div>
+</div>
 
-    <script>
-        let stompClient = null;
-        let connections = {};
+<script>
+    let stompClient = null;
+    let connections = {};
 
-        function connectGeneral() {
-            const socket = new SockJS('http://localhost:8080/dinevote');
-            stompClient = Stomp.over(socket);
-            stompClient.connect({}, function (frame) {
-                console.log('Connected: ' + frame);
-                // Subscribe to the general session
-                const subscription = stompClient.subscribe('/subscribe/vote', function (message) {
-                    showMessage(message.body);
-                });
-                connections['general'] = subscription;
-                addConnectionToList('General Session');
+    function connectUser() {
+        const userId = document.getElementById('userId').value;
+        if (userId && stompClient) {
+            const subscription = stompClient.subscribe('/subscribe/user/' + userId, function (message) {
+                showMessage(message.body);
             });
+            connections[userId] = subscription;
+            addConnectionToList(userId);
+        } else {
+            alert('Please enter a user ID and connect to the WebSocket server first');
         }
+    }
 
-        function connectToSession() {
-            const sessionId = document.getElementById('sessionIdInput').value;
-            if (sessionId && stompClient) {
-                const subscription = stompClient.subscribe('/subscribe/vote/' + sessionId, function (message) {
-                    showMessage(message.body);
+    function connectToSession() {
+        const sessionId = document.getElementById('sessionIdInput').value;
+        if (sessionId && stompClient) {
+            const subscription = stompClient.subscribe('/subscribe/vote/' + sessionId, function (message) {
+                showMessage(message.body);
+            });
+            connections[sessionId] = subscription;
+            addConnectionToList(sessionId);
+        } else {
+            alert('Please enter a session ID and connect to the WebSocket server first');
+        }
+    }
+
+    function sendVote() {
+        const sessionId = document.getElementById('voteSessionIdInput').value;
+        const userId = document.getElementById('userIdInput').value;
+        const fsqId = document.getElementById('fsqIdInput').value;
+
+        if (sessionId && userId && fsqId && stompClient) {
+            const vote = {
+                userId: userId,
+                fsqId: fsqId
+            };
+            const voteInput = {
+                sessionId: sessionId,
+                userVote: vote
+            }
+            stompClient.send('/send/vote/' + sessionId, {}, JSON.stringify(voteInput));
+        } else {
+            alert('Please fill all fields and connect to a session first');
+        }
+    }
+
+    function sendSession() {
+        const fsqIds = document.getElementById('fsqIdsInput').value.split(',');
+        const userIds = document.getElementById('userIdsInput').value.split(',');
+
+        if (fsqIds.length && userIds.length) {
+            const sessionData = {
+                fsqIds: fsqIds,
+                userIds: userIds
+            };
+            fetch('http://localhost:8080/api/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sessionData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
                 });
-                connections[sessionId] = subscription;
-                addConnectionToList(sessionId);
-            } else {
-                alert('Please enter a session ID and connect to the general session first');
-            }
+        } else {
+            alert('Please enter FSQ IDs and User IDs');
         }
+    }
 
-        function sendVote() {
-            const sessionId = document.getElementById('voteSessionIdInput').value;
-            const userId = document.getElementById('userIdInput').value;
-            const fsqId = document.getElementById('fsqIdInput').value;
+    function showMessage(message) {
+        const messagesDiv = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.textContent = message;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
 
-            if (sessionId && userId && fsqId && stompClient) {
-                const vote = {
-                    userId: userId,
-                    fsqId: fsqId
-                };
-                const voteInput = {
-                    sessionId: sessionId,
-                    userVote: vote
-                }
-                stompClient.send('/send/vote/' + sessionId, {}, JSON.stringify(voteInput));
-            } else {
-                alert('Please fill all fields and connect to a session first');
-            }
-        }
-
-        function sendSession() {
-            const fsqIds = document.getElementById('fsqIdsInput').value.split(',');
-            const userIds = document.getElementById('userIdsInput').value.split(',');
-
-            if (fsqIds.length && userIds.length && stompClient) {
-                const sessionData = {
-                    fsqIds: fsqIds,
-                    userIds: userIds
-                };
-                stompClient.send('/send/vote', {}, JSON.stringify(sessionData));
-            } else {
-                alert('Please enter FSQ IDs and User IDs');
-            }
-        }
-
-        function showMessage(message) {
-            const messagesDiv = document.getElementById('messages');
-            const messageElement = document.createElement('div');
-            messageElement.textContent = message;
-            messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function addConnectionToList(sessionId) {
-            const connectionList = document.getElementById('connectionList');
-            const connectionElement = document.createElement('div');
-            connectionElement.className = 'connection';
-            connectionElement.id = `connection-${sessionId}`;
-            connectionElement.innerHTML = `
+    function addConnectionToList(sessionId) {
+        const connectionList = document.getElementById('connectionList');
+        const connectionElement = document.createElement('div');
+        connectionElement.className = 'connection';
+        connectionElement.id = `connection-${sessionId}`;
+        connectionElement.innerHTML = `
                 <span>Session ID: ${sessionId}</span>
                 <button onclick="disconnect('${sessionId}')">Disconnect</button>
             `;
-            connectionList.appendChild(connectionElement);
-        }
+        connectionList.appendChild(connectionElement);
+    }
 
-        function disconnect(sessionId) {
-            if (connections[sessionId]) {
-                connections[sessionId].unsubscribe();
-                delete connections[sessionId];
-                const connectionElement = document.getElementById(`connection-${sessionId}`);
-                connectionElement.remove();
-            }
+    function disconnect(sessionId) {
+        if (connections[sessionId]) {
+            connections[sessionId].unsubscribe();
+            delete connections[sessionId];
+            const connectionElement = document.getElementById(`connection-${sessionId}`);
+            connectionElement.remove();
         }
-    </script>
+    }
+
+    // Initialize WebSocket connection
+    window.addEventListener('load', () => {
+        const socket = new SockJS('http://localhost:8080/dinevote');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+        });
+    });
+</script>
 </body>
 </html>
-
