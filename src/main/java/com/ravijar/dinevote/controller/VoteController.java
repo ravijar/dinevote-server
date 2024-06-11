@@ -1,10 +1,10 @@
 package com.ravijar.dinevote.controller;
 
 import com.ravijar.dinevote.model.*;
+import com.ravijar.dinevote.service.UserService;
 import com.ravijar.dinevote.service.VoteService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class VoteController {
 
     private final VoteService voteService;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final UserService userService;
 
-    VoteController(VoteService voteService , SimpMessagingTemplate messagingTemplate) {
+    VoteController(VoteService voteService, UserService userService) {
         this.voteService = voteService;
-        this.messagingTemplate = messagingTemplate;
+        this.userService = userService;
     }
 
     @PostMapping
     public void manageSession(@RequestBody SessionInput sessionInput) {
         SessionOutput sessionOutput = voteService.addVoteSession(sessionInput);
-        sendUserData(sessionOutput.getSessionId(), sessionOutput.getUserIds());
+        userService.sendUserData(sessionOutput.getSessionId(), sessionOutput.getUserIds());
     }
 
     @MessageMapping("/vote/{sessionId}")
@@ -34,15 +34,4 @@ public class VoteController {
         return voteService.updateVoteSession(voteInput.getSessionId(), voteInput.getUserVote());
     }
 
-    @MessageMapping("user/{userId}")
-    @SendTo("subscribe/user/{userId}")
-    public String getUserData(String message) {
-        return message;
-    }
-
-    public void sendUserData(String data, String[] useIds) {
-        for (String useId : useIds) {
-            messagingTemplate.convertAndSend("/subscribe/user/" + useId, data);
-        }
-    }
 }
