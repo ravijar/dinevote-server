@@ -9,9 +9,10 @@ import java.util.*;
 public class VoteService {
 
     private final Map<String, VoteSession> voteSessions = new HashMap<>();
+    private final UserService userService;
 
-    public Map<String, VoteSession> getVoteSessions() {
-        return voteSessions;
+    public VoteService(UserService userService) {
+        this.userService = userService;
     }
 
     private String generateSessionId() {
@@ -29,6 +30,7 @@ public class VoteService {
 
         for (String userId : sessionInput.getUserIds()) {
             userVotes.add(new UserVote(userId, null));
+            userService.changeUserStatus(userId);
         }
 
         voteSessions.put(sessionId, new VoteSession(locationVotes, userVotes));

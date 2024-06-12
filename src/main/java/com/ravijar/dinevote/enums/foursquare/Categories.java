@@ -1,4 +1,4 @@
-package com.ravijar.dinevote.enums;
+package com.ravijar.dinevote.enums.foursquare;
 
 import lombok.Getter;
 

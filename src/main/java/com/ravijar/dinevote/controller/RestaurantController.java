@@ -1,7 +1,7 @@
 package com.ravijar.dinevote.controller;
 
-import com.ravijar.dinevote.enums.Categories;
-import com.ravijar.dinevote.enums.Fields;
+import com.ravijar.dinevote.enums.foursquare.Categories;
+import com.ravijar.dinevote.enums.foursquare.Fields;
 import com.ravijar.dinevote.service.FourSquareService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

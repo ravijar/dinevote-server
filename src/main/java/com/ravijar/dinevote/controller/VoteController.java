@@ -25,7 +25,7 @@ public class VoteController {
     @PostMapping
     public void manageSession(@RequestBody SessionInput sessionInput) {
         SessionOutput sessionOutput = voteService.addVoteSession(sessionInput);
-        userService.sendUserData(sessionOutput.getSessionId(), sessionOutput.getUserIds());
+        userService.sendSessionId(sessionOutput.getSessionId(), sessionOutput.getUserIds());
     }
 
     @MessageMapping("/vote/{sessionId}")
