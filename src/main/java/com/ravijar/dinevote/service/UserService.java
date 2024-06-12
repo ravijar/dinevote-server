@@ -10,7 +10,8 @@ import java.util.Map;
 @Service
 public class UserService {
 
-    private final Map<String, String> users = new HashMap<>();
+    private final Map<String, Status> liveUsers = new HashMap<>();
+    private final Map<String, String> requestedUsers = new HashMap<>();
     private final SimpMessagingTemplate messagingTemplate;
 
     public UserService(SimpMessagingTemplate messagingTemplate) {
@@ -23,20 +24,26 @@ public class UserService {
         }
     }
 
-    public void addUser(String userId) {
-        users.put(userId, Status.AVAILABLE.getStatus());
+    public void addLiveUser(String userId) {
+        if (requestedUsers.containsKey(userId)) {
+            liveUsers.put(userId, Status.AVAILABLE);
+            requestedUsers.remove(userId);
+        }
     }
 
-    public void removeUser(String userId) {
-        users.remove(userId);
+    public void removeLiveUser(String userId) {
+        liveUsers.remove(userId);
     }
 
-    public void changeUserStatus(String userId) {
-        if (users.containsKey(userId)) {
+    public void changeUserStatus(String userId, Status status) {
+        if (liveUsers.containsKey(userId)) {
+            liveUsers.replace(userId, status);
+        }
+    }
 
-            if (users.get(userId).equals(Status.AVAILABLE.getStatus())) {
-                users.replace(userId, Status.BUSY.getStatus());
-            }
+    public void requestUser(String userId, String sessionId) {
+        if (!requestedUsers.containsKey(userId)) {
+            requestedUsers.put(userId, sessionId);
         }
     }
 }

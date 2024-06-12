@@ -12,4 +12,5 @@ import java.util.List;
 public class VoteSession {
     private List<LocationVote> locationVotes;
     private List<UserVote> userVotes;
+    private List<UserStatus> userStatuses;
 }

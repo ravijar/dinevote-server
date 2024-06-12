@@ -1,5 +1,6 @@
 package com.ravijar.dinevote.service;
 
+import com.ravijar.dinevote.enums.user.Status;
 import com.ravijar.dinevote.model.*;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class VoteService {
         String sessionId = generateSessionId();
         List<LocationVote> locationVotes = new ArrayList<>();
         List<UserVote> userVotes = new ArrayList<>();
+        List<UserStatus> userStatuses = new ArrayList<>();
 
         for (String fsqId : sessionInput.getFsqIds()) {
             locationVotes.add(new LocationVote(fsqId, 0));
@@ -30,10 +32,11 @@ public class VoteService {
 
         for (String userId : sessionInput.getUserIds()) {
             userVotes.add(new UserVote(userId, null));
-            userService.changeUserStatus(userId);
+            userStatuses.add(new UserStatus(userId, Status.REQUESTED));
+            userService.requestUser(userId, sessionId);
         }
 
-        voteSessions.put(sessionId, new VoteSession(locationVotes, userVotes));
+        voteSessions.put(sessionId, new VoteSession(locationVotes, userVotes, userStatuses));
 
         return new SessionOutput(sessionId, sessionInput.getUserIds());
     }

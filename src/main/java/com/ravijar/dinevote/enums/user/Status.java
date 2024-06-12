@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum Status {
     AVAILABLE("available"),
-    BUSY("busy");
+    JOINED("joined"),
+    REQUESTED("requested");
 
     private String status;
 
