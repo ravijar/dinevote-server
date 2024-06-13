@@ -112,7 +112,12 @@
                 sessionId: sessionId,
                 userVote: vote
             }
-            stompClient.send('/send/vote/' + sessionId, {}, JSON.stringify(voteInput));
+            const message = {
+                messageType: "VOTE",
+                data: voteInput
+            }
+            stompClient.send('/send/vote/' + sessionId, {}, JSON.stringify(message));
+            console.log(JSON.stringify(message));
         } else {
             alert('Please fill all fields and connect to a session first');
         }

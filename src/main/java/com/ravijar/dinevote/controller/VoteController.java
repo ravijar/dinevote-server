@@ -1,5 +1,8 @@
 package com.ravijar.dinevote.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ravijar.dinevote.enums.communication.MessageTypes;
 import com.ravijar.dinevote.model.*;
 import com.ravijar.dinevote.service.UserService;
 import com.ravijar.dinevote.service.VoteService;
@@ -16,6 +19,7 @@ public class VoteController {
 
     private final VoteService voteService;
     private final UserService userService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     VoteController(VoteService voteService, UserService userService) {
         this.voteService = voteService;
@@ -23,15 +27,16 @@ public class VoteController {
     }
 
     @PostMapping
-    public void manageSession(@RequestBody SessionInput sessionInput) {
+    public void initiateVoteSession(@RequestBody SessionInput sessionInput) {
         SessionOutput sessionOutput = voteService.addVoteSession(sessionInput);
         userService.sendSessionId(sessionOutput.getSessionId(), sessionOutput.getUserIds());
     }
 
     @MessageMapping("/vote/{sessionId}")
     @SendTo("/subscribe/vote/{sessionId}")
-    public LocationVote getVoteData(VoteInput voteInput) {
-        return voteService.updateVoteSession(voteInput.getSessionId(), voteInput.getUserVote());
+    public Message messageVoteSession(Message message) {
+        VoteInput voteInput = objectMapper.convertValue(message.getData(), VoteInput.class);
+        return new Message(MessageTypes.VOTE, voteService.updateVoteSession(voteInput.getSessionId(), voteInput.getUserVote()));
     }
 
 }
