@@ -20,7 +20,7 @@ public class VoteService {
         return UUID.randomUUID().toString();
     }
 
-    public SessionOutput addVoteSession(SessionInput sessionInput) {
+    public void addVoteSession(SessionInput sessionInput) {
         String sessionId = generateSessionId();
         List<LocationVote> locationVotes = new ArrayList<>();
         List<UserVote> userVotes = new ArrayList<>();
@@ -38,7 +38,6 @@ public class VoteService {
 
         voteSessions.put(sessionId, new VoteSession(locationVotes, userVotes, userStatuses));
 
-        return new SessionOutput(sessionId, sessionInput.getUserIds());
     }
 
     public LocationVote updateVoteSession(String sessionId, UserVote newUserVote) {

@@ -1,6 +1,9 @@
 package com.ravijar.dinevote.service;
 
+import com.ravijar.dinevote.enums.communication.MessageTypes;
+import com.ravijar.dinevote.enums.communication.ResponseTypes;
 import com.ravijar.dinevote.enums.user.Status;
+import com.ravijar.dinevote.model.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,21 +21,14 @@ public class UserService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendSessionId(String SessionId, String[] useIds) {
-        for (String useId : useIds) {
-            messagingTemplate.convertAndSend("/subscribe/user/" + useId, SessionId);
-        }
+    public ResponseTypes addLiveUser(String userId) {
+        liveUsers.put(userId, Status.AVAILABLE);
+        return ResponseTypes.SUCCESSFUL;
     }
 
-    public void addLiveUser(String userId) {
-        if (requestedUsers.containsKey(userId)) {
-            liveUsers.put(userId, Status.AVAILABLE);
-            requestedUsers.remove(userId);
-        }
-    }
-
-    public void removeLiveUser(String userId) {
+    public ResponseTypes removeLiveUser(String userId) {
         liveUsers.remove(userId);
+        return ResponseTypes.SUCCESSFUL;
     }
 
     public void changeUserStatus(String userId, Status status) {
@@ -44,6 +40,20 @@ public class UserService {
     public void requestUser(String userId, String sessionId) {
         if (!requestedUsers.containsKey(userId)) {
             requestedUsers.put(userId, sessionId);
+            sendRequestMessage(sessionId, userId);
         }
+    }
+
+    public boolean userRequested(String userId) {
+        return requestedUsers.containsKey(userId);
+    }
+
+    public String getRequestedUserSessionId(String userId) {
+        return requestedUsers.get(userId);
+    }
+
+    public void sendRequestMessage(String sessionId, String useId) {
+        Message message = new Message(MessageTypes.USER_REQUESTED, sessionId);
+        messagingTemplate.convertAndSend("/subscribe/user/" + useId, message);
     }
 }

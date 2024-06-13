@@ -18,18 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class VoteController {
 
     private final VoteService voteService;
-    private final UserService userService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    VoteController(VoteService voteService, UserService userService) {
+    VoteController(VoteService voteService) {
         this.voteService = voteService;
-        this.userService = userService;
     }
 
     @PostMapping
     public void initiateVoteSession(@RequestBody SessionInput sessionInput) {
-        SessionOutput sessionOutput = voteService.addVoteSession(sessionInput);
-        userService.sendSessionId(sessionOutput.getSessionId(), sessionOutput.getUserIds());
+        voteService.addVoteSession(sessionInput);
     }
 
     @MessageMapping("/vote/{sessionId}")
