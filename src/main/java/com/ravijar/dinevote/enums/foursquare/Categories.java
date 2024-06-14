@@ -35,7 +35,7 @@ public enum Categories {
     CAFES(
             "13032,13033,13034,13035,13036,10363"
     ),
-    DESSERTSHOPS(
+    DESSERT_SHOPS(
             "13040,13042,13044,13045,13046,13047,13048,13392"
     );
 

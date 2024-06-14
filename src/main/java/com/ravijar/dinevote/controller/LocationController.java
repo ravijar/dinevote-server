@@ -13,16 +13,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/restaurant")
-public class RestaurantController {
+public class LocationController {
 
     private final FourSquareService fourSquareService;
 
-    public RestaurantController(FourSquareService fourSquareService) {
+    public LocationController(FourSquareService fourSquareService) {
         this.fourSquareService = fourSquareService;
     }
 
     @GetMapping
-    public List<Map<String,Object>> getAllRestaurants(
+    public List<Map<String,Object>> getAllLocations(
             @RequestParam double latitude,
             @RequestParam double longitude,
             @RequestParam int radius,
@@ -33,7 +33,7 @@ public class RestaurantController {
             case "restaurant" -> Categories.RESTAURANTS.getIds();
             case "bar" -> Categories.BARS.getIds();
             case "cafe" -> Categories.CAFES.getIds();
-            case "dessertshop" -> Categories.DESSERTSHOPS.getIds();
+            case "dessertshop" -> Categories.DESSERT_SHOPS.getIds();
             default -> throw new IllegalArgumentException("Unsupported category: " + category);
         };
 

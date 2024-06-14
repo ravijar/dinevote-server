@@ -22,7 +22,7 @@ public class VoteController {
         this.voteService = voteService;
     }
 
-    @PostMapping
+    @PostMapping("/initiate")
     public void initiateVoteSession(@RequestBody SessionInit sessionInit) {
         voteService.addVoteSession(sessionInit);
     }

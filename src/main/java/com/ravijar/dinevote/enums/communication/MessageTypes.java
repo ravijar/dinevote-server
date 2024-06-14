@@ -11,5 +11,4 @@ public enum MessageTypes {
     SESSION_STARTED,
     SESSION_FINISHED,
     VOTE
-
 }
