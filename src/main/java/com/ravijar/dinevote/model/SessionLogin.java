@@ -9,7 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class SessionInput {
-    private String[] fsqIds;
-    private String[] userIds;
+public class SessionLogin {
+    private String sessionId;
+    private String userId;
 }

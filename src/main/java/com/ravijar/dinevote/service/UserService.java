@@ -44,6 +44,10 @@ public class UserService {
         }
     }
 
+    public void removeRequestedUser(String userId) {
+        requestedUsers.remove(userId);
+    }
+
     public boolean userRequested(String userId) {
         return requestedUsers.containsKey(userId);
     }
