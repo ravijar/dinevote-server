@@ -45,7 +45,11 @@ public class VoteService {
 
     }
 
-    public LocationVote updateVoteSession(String sessionId, UserVote newUserVote) {
+    public void removeVoteSession(String sessionId) {
+        voteSessions.remove(sessionId);
+    }
+
+    public LocationVote addVoteToVoteSession(String sessionId, UserVote newUserVote) {
         LocationVote updatedLocationVote = null;
 
         if (voteSessions.containsKey(sessionId)) {
@@ -66,6 +70,7 @@ public class VoteService {
 
             if (voteSession.getVoteCount() == voteSession.getUserVotes().size()) {
                 sendSessionFinishMessage(sessionId);
+                removeVoteSession(sessionId);
             }
         }
 
@@ -76,7 +81,7 @@ public class VoteService {
         return voteSessions.get(sessionId);
     }
 
-    public ResponseTypes addUserToSession (String sessionId, String userId) {
+    public ResponseTypes addUserToVoteSession(String sessionId, String userId) {
         if (voteSessions.containsKey(sessionId)) {
             VoteSession voteSession = voteSessions.get(sessionId);
             for (UserStatus userStatus : voteSession.getUserStatuses()) {

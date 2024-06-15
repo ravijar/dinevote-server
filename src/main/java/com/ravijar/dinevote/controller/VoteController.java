@@ -35,12 +35,12 @@ public class VoteController {
         switch (message.getMessageType()) {
             case SESSION_LOGIN:
                 SessionLogin sessionLogin = objectMapper.convertValue(message.getData(), SessionLogin.class);
-                response = new Message(MessageTypes.SESSION_LOGIN, voteService.addUserToSession(sessionLogin.getSessionId(), sessionLogin.getUserId()));
+                response = new Message(MessageTypes.SESSION_LOGIN, voteService.addUserToVoteSession(sessionLogin.getSessionId(), sessionLogin.getUserId()));
                 break;
 
             case VOTE:
                 VoteInput voteInput = objectMapper.convertValue(message.getData(), VoteInput.class);
-                response = new Message(MessageTypes.VOTE, voteService.updateVoteSession(voteInput.getSessionId(), voteInput.getUserVote()));
+                response = new Message(MessageTypes.VOTE, voteService.addVoteToVoteSession(voteInput.getSessionId(), voteInput.getUserVote()));
                 break;
         }
 
