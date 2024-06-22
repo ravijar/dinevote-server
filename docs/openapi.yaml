@@ -1,0 +1,90 @@
+openapi: 3.1.0
+info:
+  title: DineVote API
+  description: API for the DineVote application
+  version: 0.0.1
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local server
+
+paths:
+  /api/restaurant:
+    get:
+      summary: Get all locations
+      description: Retrieve a list of locations based on latitude, longitude, radius, and category.
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: radius
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [restaurant, bar, cafe, dessertshop]
+      responses:
+        '200':
+          description: A list of locations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /api/vote/initiate:
+    post:
+      summary: Initiate a vote session
+      description: Create a new vote session.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionInit'
+      responses:
+        '200':
+          description: Session initiated successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+components:
+  schemas:
+    SessionInit:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        userId:
+          type: string
